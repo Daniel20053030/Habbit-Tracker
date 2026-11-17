@@ -26,6 +26,25 @@ Future<void> main() async {
   );
 }
 
+const _materialIconsByCodePoint = <int, IconData>{
+  0xe1dc: Icons.directions_run,
+  0xe3dd: Icons.menu_book,
+  0xf05a2: Icons.water_drop,
+  0xe56f: Icons.self_improvement,
+  0xe28d: Icons.fitness_center,
+  0xe491: Icons.person,
+  0xe5f9: Icons.star,
+  0xf055d: Icons.rocket_launch,
+  0xe798: Icons.water_drop,
+  0xe3f1: Icons.directions_run,
+  0xe8b8: Icons.menu_book,
+  0xe838: Icons.star,
+  0xe1a5: Icons.rocket_launch,
+};
+
+IconData iconForCodePoint(int? codePoint) =>
+    _materialIconsByCodePoint[codePoint] ?? Icons.help_outline;
+
 final _router = GoRouter(
   initialLocation: '/',
   routes: [
@@ -351,10 +370,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                     backgroundColor: Color(habit.colorValue)
                         .withValues(alpha: 0.2),
                     child: Icon(
-                      IconData(
-                        habit.iconCodePoint,
-                        fontFamily: 'MaterialIcons',
-                      ),
+                      iconForCodePoint(habit.iconCodePoint),
                       color: Color(habit.colorValue),
                     ),
                   ),
@@ -831,7 +847,7 @@ class StatsScreen extends ConsumerWidget {
           (habit) => Card(
             child: ListTile(
               leading: Icon(
-                IconData(habit.iconCodePoint, fontFamily: 'MaterialIcons'),
+                iconForCodePoint(habit.iconCodePoint),
                 color: Color(habit.colorValue),
               ),
               title: Text(habit.title),
@@ -1097,10 +1113,9 @@ class ProfileAvatar extends StatelessWidget {
             radius: size / 2,
             backgroundColor: AppTheme.surfaceLight,
             child: Icon(
-              IconData(
+              iconForCodePoint(
                 shopItemById(profile.avatarKey).iconCodePoint ??
                     Icons.person.codePoint,
-                fontFamily: 'MaterialIcons',
               ),
               size: size * .5,
             ),
@@ -1216,12 +1231,7 @@ class _ProfileEditorScreenState extends ConsumerState<ProfileEditorScreen> {
                   .map(
                     (item) => ChoiceChip(
                       selected: _avatarKey == item.id && _imageBase64 == null,
-                      label: Icon(
-                        IconData(
-                          item.iconCodePoint!,
-                          fontFamily: 'MaterialIcons',
-                        ),
-                      ),
+                      label: Icon(iconForCodePoint(item.iconCodePoint)),
                       onSelected: (_) => setState(() {
                         _avatarKey = item.id;
                         _imageBase64 = null;
@@ -1445,11 +1455,7 @@ class _ShopItemIcon extends StatelessWidget {
       backgroundColor: item.colorValue == null
           ? AppTheme.surfaceLight
           : Color(item.colorValue!),
-      child: Icon(
-        item.iconCodePoint == null
-            ? Icons.person
-            : IconData(item.iconCodePoint!, fontFamily: 'MaterialIcons'),
-      ),
+      child: Icon(iconForCodePoint(item.iconCodePoint)),
     );
   }
 }
@@ -1474,7 +1480,7 @@ class _SectionTitle extends StatelessWidget {
         ),
       ),
       if (action != null) Text(action!),
-      if (trailing != null) trailing!,
+      ?trailing,
     ],
   );
 }
