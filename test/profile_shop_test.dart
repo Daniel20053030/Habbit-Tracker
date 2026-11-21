@@ -1,6 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import 'package:habit_tracker_app/models/habit.dart';
 import 'package:habit_tracker_app/models/shop_item.dart';
 import 'package:habit_tracker_app/models/user_profile.dart';
 import 'package:habit_tracker_app/providers/app_provider.dart';
@@ -39,6 +40,70 @@ void main() {
     expect(reloaded.name, 'Jamie');
     expect(reloaded.streakSavers, 1);
   });
+
+  test('deleting a habit also removes its completion history', () async {
+    SharedPreferences.setMockInitialValues({});
+    final preferences = await SharedPreferences.getInstance();
+    final controller = AppController(LocalStorageService(preferences));
+    final habit = Habit(
+      id: 'deletable',
+      title: 'Read',
+      iconCodePoint: null,
+      colorValue: 0xffa78bfa,
+      frequency: HabitFrequency.daily,
+      goal: 'Read a few pages',
+      createdAt: DateTime.now(),
+    );
+
+    await controller.saveHabit(habit);
+    expect(await controller.completeToday(habit.id), isTrue);
+    expect(controller.state.logs, hasLength(1));
+
+    await controller.deleteHabit(habit.id);
+
+    expect(
+      controller.state.habits.where((item) => item.id == habit.id),
+      isEmpty,
+    );
+    expect(
+      controller.state.logs.where((log) => log.habitId == habit.id),
+      isEmpty,
+    );
+    final reloaded = LocalStorageService(preferences);
+    expect(reloaded.readHabits().where((item) => item.id == habit.id), isEmpty);
+    expect(
+      reloaded.readLogs().where((log) => log.habitId == habit.id),
+      isEmpty,
+    );
+  });
+
+  test(
+    'markerless habits persist without a marker or health sync field',
+    () async {
+      SharedPreferences.setMockInitialValues({});
+      final preferences = await SharedPreferences.getInstance();
+      final controller = AppController(LocalStorageService(preferences));
+      final habit = Habit(
+        id: 'markerless',
+        title: 'Breathe',
+        iconCodePoint: null,
+        colorValue: 0xff62d6a7,
+        frequency: HabitFrequency.daily,
+        goal: 'Take a mindful break',
+        createdAt: DateTime.now(),
+      );
+
+      await controller.saveHabit(habit);
+
+      final raw = preferences.getString('habits');
+      expect(raw, isNot(contains('healthSync')));
+      final reloaded = LocalStorageService(preferences).readHabits();
+      expect(
+        reloaded.firstWhere((item) => item.id == 'markerless').iconCodePoint,
+        isNull,
+      );
+    },
+  );
 
   test('automatic streak saver fills one missed day once', () async {
     final previous = DateTime.now().subtract(const Duration(days: 2));

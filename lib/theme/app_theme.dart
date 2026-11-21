@@ -2,13 +2,15 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 class AppTheme {
-  static const background = Color(0xFF0D1524);
-  static const surface = Color(0xFF18253A);
-  static const surfaceLight = Color(0xFF263752);
-  static const accent = Color(0xFF72B5FF);
-  static const accentStrong = Color(0xFF4F9CF9);
-  static const textMuted = Color(0xFFA8B7CC);
-  static const success = Color(0xFF62D6A7);
+  static const background = Color(0xFF07111F);
+  static const surface = Color(0xFF10243A);
+  static const surfaceLight = Color(0xFF1A3A55);
+  static const accent = Color(0xFF42D9FF);
+  static const accentStrong = Color(0xFF00B8D9);
+  static const secondary = Color(0xFFA78BFA);
+  static const highlight = Color(0xFFF2B84B);
+  static const textMuted = Color(0xFF9FB7C9);
+  static const success = Color(0xFF64E8A5);
 
   static ThemeData dark() => ThemeData(
     brightness: Brightness.dark,
@@ -16,9 +18,9 @@ class AppTheme {
     scaffoldBackgroundColor: background,
     colorScheme: const ColorScheme.dark(
       primary: accent,
-      onPrimary: Color(0xFF08203B),
+      onPrimary: Color(0xFF06202A),
       secondary: success,
-      onSecondary: Color(0xFF09241D),
+      onSecondary: Color(0xFF08251C),
       surface: surface,
       onSurface: Colors.white,
       error: Color(0xFFFF8B8B),
@@ -31,7 +33,7 @@ class AppTheme {
     ),
     navigationBarTheme: NavigationBarThemeData(
       backgroundColor: surface,
-      indicatorColor: accent.withValues(alpha: 0.18),
+      indicatorColor: accent.withValues(alpha: 0.16),
       height: 72,
       labelTextStyle: WidgetStatePropertyAll(
         TextStyle(fontWeight: FontWeight.w600, fontSize: 12),
@@ -43,7 +45,7 @@ class AppTheme {
       elevation: 0,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(18),
-        side: const BorderSide(color: Color(0x1A8BA7C7)),
+        side: const BorderSide(color: Color(0x3342D9FF)),
       ),
     ),
     filledButtonTheme: FilledButtonThemeData(
@@ -60,7 +62,7 @@ class AppTheme {
       style: OutlinedButton.styleFrom(
         foregroundColor: accent,
         minimumSize: const Size(48, 48),
-        side: const BorderSide(color: Color(0x6672B5FF)),
+        side: const BorderSide(color: Color(0x8042D9FF)),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
       ),
     ),
@@ -76,11 +78,11 @@ class AppTheme {
       contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
       border: OutlineInputBorder(
         borderRadius: BorderRadius.circular(14),
-        borderSide: const BorderSide(color: Color(0x1A8BA7C7)),
+        borderSide: const BorderSide(color: Color(0x3342D9FF)),
       ),
       enabledBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(14),
-        borderSide: const BorderSide(color: Color(0x1A8BA7C7)),
+        borderSide: const BorderSide(color: Color(0x3342D9FF)),
       ),
       focusedBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(14),
