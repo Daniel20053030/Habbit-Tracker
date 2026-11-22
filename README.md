@@ -27,6 +27,9 @@ notifications, pets, challenges, or a full achievements system.
 - A Streak saver is automatically consumed when the next check-in detects
   exactly one missed day. It protects the streak but does not award XP for the
   missed day.
+- New profiles start as User1 with 60 coins. A red Shop indicator appears when
+  an unowned reward can be redeemed, and the 75-coin reward notice is shown
+  only once.
 - Shop inventory, equipped items, and saver balance are stored locally.
 
 ## Architecture

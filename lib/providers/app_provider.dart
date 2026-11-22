@@ -121,6 +121,13 @@ class AppController extends StateNotifier<AppState> {
     await _storage.writeProfile(profile);
   }
 
+  Future<void> markShopRewardNotificationShown() async {
+    if (state.profile.shopRewardNotificationShown) return;
+    await updateProfile(
+      state.profile.copyWith(shopRewardNotificationShown: true),
+    );
+  }
+
   Future<bool> purchaseItem(ShopItem item) async {
     final profile = state.profile;
     if (item.type != ShopItemType.streakSaver &&
