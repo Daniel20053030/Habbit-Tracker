@@ -1,14 +1,15 @@
 class UserProfile {
   const UserProfile({
-    this.name = 'lanciao',
+    this.name = 'User1',
     this.xp = 0,
-    this.coins = 0,
+    this.coins = 60,
     this.longestStreak = 0,
     this.avatarKey = 'person',
     this.profileImageBase64,
     this.borderKey = 'none',
     this.ownedItems = const ['avatar_person'],
     this.streakSavers = 0,
+    this.shopRewardNotificationShown = false,
   });
 
   final String name;
@@ -20,6 +21,7 @@ class UserProfile {
   final String borderKey;
   final List<String> ownedItems;
   final int streakSavers;
+  final bool shopRewardNotificationShown;
 
   int get level {
     var remainingXp = xp;
@@ -61,6 +63,7 @@ class UserProfile {
     String? borderKey,
     List<String>? ownedItems,
     int? streakSavers,
+    bool? shopRewardNotificationShown,
   }) => UserProfile(
     name: name ?? this.name,
     xp: xp ?? this.xp,
@@ -71,6 +74,8 @@ class UserProfile {
     borderKey: borderKey ?? this.borderKey,
     ownedItems: ownedItems ?? this.ownedItems,
     streakSavers: streakSavers ?? this.streakSavers,
+    shopRewardNotificationShown:
+        shopRewardNotificationShown ?? this.shopRewardNotificationShown,
   );
 
   Map<String, dynamic> toJson() => {
@@ -83,12 +88,13 @@ class UserProfile {
     'borderKey': borderKey,
     'ownedItems': ownedItems,
     'streakSavers': streakSavers,
+    'shopRewardNotificationShown': shopRewardNotificationShown,
   };
 
   factory UserProfile.fromJson(Map<String, dynamic> json) => UserProfile(
-    name: json['name'] as String? ?? 'Alex',
+    name: json['name'] as String? ?? 'User1',
     xp: json['xp'] as int? ?? 0,
-    coins: json['coins'] as int? ?? 0,
+    coins: json['coins'] as int? ?? 60,
     longestStreak: json['longestStreak'] as int? ?? 0,
     avatarKey: json['avatarKey'] as String? ?? 'person',
     profileImageBase64: json['profileImageBase64'] as String?,
@@ -97,5 +103,7 @@ class UserProfile {
         (json['ownedItems'] as List<dynamic>?)?.cast<String>() ??
         const ['avatar_person'],
     streakSavers: json['streakSavers'] as int? ?? 0,
+    shopRewardNotificationShown:
+        json['shopRewardNotificationShown'] as bool? ?? false,
   );
 }

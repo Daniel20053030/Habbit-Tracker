@@ -1822,6 +1822,14 @@ class _StatSummary extends StatelessWidget {
   );
 }
 
+bool _hasAffordableShopReward(UserProfile profile) => shopItems.any(
+  (item) =>
+      item.price >= 75 &&
+      profile.coins >= item.price &&
+      (item.type == ShopItemType.streakSaver ||
+          !profile.ownedItems.contains(item.id)),
+);
+
 class ProfileScreen extends ConsumerWidget {
   const ProfileScreen({super.key});
 
@@ -1884,9 +1892,35 @@ class ProfileScreen extends ConsumerWidget {
         const SizedBox(height: 18),
         Card(
           child: ListTile(
-            leading: const Icon(
-              Icons.storefront_outlined,
-              color: AppTheme.highlight,
+            leading: Stack(
+              clipBehavior: Clip.none,
+              children: [
+                const Icon(
+                  Icons.storefront_outlined,
+                  color: AppTheme.highlight,
+                ),
+                if (_hasAffordableShopReward(state.profile))
+                  Positioned(
+                    top: -3,
+                    right: -5,
+                    child: Tooltip(
+                      message: 'A Shop reward is ready to redeem',
+                      child: Container(
+                        key: const ValueKey('shop-reward-indicator'),
+                        width: 10,
+                        height: 10,
+                        decoration: BoxDecoration(
+                          color: Theme.of(context).colorScheme.error,
+                          shape: BoxShape.circle,
+                          border: Border.all(
+                            color: AppTheme.surface,
+                            width: 1.5,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+              ],
             ),
             title: const Text('Shop'),
             subtitle: Text('${state.profile.coins} coins available'),
@@ -1895,7 +1929,7 @@ class ProfileScreen extends ConsumerWidget {
           ),
         ),
         const SizedBox(height: 18),
-        _ProfileSectionTitle(title: 'Daily Quote', action: 'View'),
+        const _ProfileSectionTitle(title: 'Daily Quote'),
         const SizedBox(height: 8),
         Container(
           height: 150,
@@ -1925,10 +1959,10 @@ class ProfileScreen extends ConsumerWidget {
 }
 
 class _ProfileSectionTitle extends StatelessWidget {
-  const _ProfileSectionTitle({required this.title, required this.action});
+  const _ProfileSectionTitle({required this.title, this.action});
 
   final String title;
-  final String action;
+  final String? action;
 
   @override
   Widget build(BuildContext context) => Row(
@@ -1939,9 +1973,11 @@ class _ProfileSectionTitle extends StatelessWidget {
           style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w800),
         ),
       ),
-      Text(action, style: const TextStyle(color: AppTheme.textMuted)),
-      const SizedBox(width: 4),
-      const Icon(Icons.chevron_right, color: AppTheme.textMuted, size: 20),
+      if (action != null) ...[
+        Text(action!, style: const TextStyle(color: AppTheme.textMuted)),
+        const SizedBox(width: 4),
+        const Icon(Icons.chevron_right, color: AppTheme.textMuted, size: 20),
+      ],
     ],
   );
 }
@@ -2549,11 +2585,42 @@ class _SettingsDetailScreenState extends ConsumerState<SettingsDetailScreen> {
   }
 }
 
-class ShopScreen extends ConsumerWidget {
+class ShopScreen extends ConsumerStatefulWidget {
   const ShopScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<ShopScreen> createState() => _ShopScreenState();
+}
+
+class _ShopScreenState extends ConsumerState<ShopScreen> {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _notifyAvailableReward();
+    });
+  }
+
+  Future<void> _notifyAvailableReward() async {
+    final profile = ref.read(appProvider).profile;
+    if (!_hasAffordableShopReward(profile) ||
+        profile.shopRewardNotificationShown) {
+      return;
+    }
+
+    await ref.read(appProvider.notifier).markShopRewardNotificationShown();
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text(
+          'Shop reward ready! Redeem an item starting at 75 coins.',
+        ),
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final profile = ref.watch(appProvider).profile;
     final controller = ref.read(appProvider.notifier);
     return ListView(
