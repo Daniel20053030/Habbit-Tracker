@@ -59,6 +59,11 @@ void main() {
     expect(find.text('Habit type'), findsOneWidget);
     expect(find.text('Goal period'), findsOneWidget);
     expect(find.text('Task days'), findsOneWidget);
+    expect(find.text('Goal value'), findsNothing);
+    expect(
+      find.byKey(const ValueKey('habit-custom-color-button')),
+      findsOneWidget,
+    );
 
     await tester.enterText(
       find.byKey(const ValueKey('habit-name-field')),
