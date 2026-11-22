@@ -109,7 +109,7 @@ void main() {
     final previous = DateTime.now().subtract(const Duration(days: 2));
     SharedPreferences.setMockInitialValues({
       'habits': '[{"id":"habit","title":"Habit","iconCodePoint":59136,"colorValue":4283389177,"frequency":"daily","difficulty":"easy","goal":"Daily","createdAt":"2026-10-19T00:00:00.000"}]',
-      'profile': '{"name":"Alex","xp":0,"coins":0,"longestStreak":0,"avatarKey":"person","borderKey":"none","ownedItems":["avatar_person"],"streakSavers":1}',
+      'profile': '{"name":"Lanciao","xp":0,"coins":0,"longestStreak":0,"avatarKey":"person","borderKey":"none","ownedItems":["avatar_person"],"streakSavers":1}',
       'logs': '[{"habitId":"habit","date":"${previous.toIso8601String()}"}]',
     });
     final preferences = await SharedPreferences.getInstance();

@@ -1,6 +1,6 @@
 class UserProfile {
   const UserProfile({
-    this.name = 'Alex',
+    this.name = 'lanciao',
     this.xp = 0,
     this.coins = 0,
     this.longestStreak = 0,
