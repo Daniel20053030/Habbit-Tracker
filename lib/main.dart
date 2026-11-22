@@ -746,6 +746,37 @@ class _HomeEmptyState extends StatelessWidget {
   );
 }
 
+class _ColorSlider extends StatelessWidget {
+  const _ColorSlider({
+    required this.label,
+    required this.value,
+    required this.max,
+    required this.activeColor,
+    required this.onChanged,
+  });
+
+  final String label;
+  final double value;
+  final double max;
+  final Color activeColor;
+  final ValueChanged<double> onChanged;
+
+  @override
+  Widget build(BuildContext context) => Column(
+    crossAxisAlignment: CrossAxisAlignment.start,
+    children: [
+      Text(label),
+      Slider(
+        value: value.clamp(0, max).toDouble(),
+        min: 0,
+        max: max,
+        activeColor: activeColor,
+        onChanged: onChanged,
+      ),
+    ],
+  );
+}
+
 class _StarterQuestChip extends StatelessWidget {
   const _StarterQuestChip({
     required this.title,
@@ -787,7 +818,6 @@ class _HabitFormScreenState extends ConsumerState<HabitFormScreen> {
   final _formKey = GlobalKey<FormState>();
   late final TextEditingController _titleController;
   late final TextEditingController _descriptionController;
-  late final TextEditingController _goalValueController;
   final HabitFrequency _frequency = HabitFrequency.daily;
   final int _weeklyTarget = 1;
   late int _color;
@@ -840,9 +870,6 @@ class _HabitFormScreenState extends ConsumerState<HabitFormScreen> {
     final habit = _habit;
     _titleController = TextEditingController(text: habit?.title);
     _descriptionController = TextEditingController(text: habit?.description);
-    _goalValueController = TextEditingController(
-      text: '${habit?.goalValue ?? 1}',
-    );
     _color = habit?.colorValue ?? AppTheme.accent.toARGB32();
     _icon = habit?.iconCodePoint;
     _habitType = habit?.habitType ?? HabitType.build;
@@ -858,7 +885,6 @@ class _HabitFormScreenState extends ConsumerState<HabitFormScreen> {
   void dispose() {
     _titleController.dispose();
     _descriptionController.dispose();
-    _goalValueController.dispose();
     super.dispose();
   }
 
@@ -1051,6 +1077,21 @@ class _HabitFormScreenState extends ConsumerState<HabitFormScreen> {
                     )
                     .toList(),
               ),
+              const SizedBox(height: 10),
+              OutlinedButton.icon(
+                key: const ValueKey('habit-custom-color-button'),
+                onPressed: _chooseCustomColor,
+                icon: Container(
+                  width: 22,
+                  height: 22,
+                  decoration: BoxDecoration(
+                    color: Color(_color),
+                    shape: BoxShape.circle,
+                    border: Border.all(color: AppTheme.textMuted, width: 1),
+                  ),
+                ),
+                label: const Text('Choose custom color'),
+              ),
               const SizedBox(height: 16),
               DropdownButtonFormField<HabitType>(
                 initialValue: _habitType,
@@ -1084,22 +1125,6 @@ class _HabitFormScreenState extends ConsumerState<HabitFormScreen> {
                     .toList(),
                 onChanged: (value) =>
                     setState(() => _goalPeriod = value ?? GoalPeriod.day),
-              ),
-              const SizedBox(height: 12),
-              TextFormField(
-                key: const ValueKey('habit-goal-value-field'),
-                controller: _goalValueController,
-                keyboardType: TextInputType.number,
-                decoration: const InputDecoration(
-                  labelText: 'Goal value',
-                  suffixText: 'per day',
-                ),
-                validator: (value) {
-                  final parsed = int.tryParse(value?.trim() ?? '');
-                  return parsed == null || parsed < 1
-                      ? 'Enter a whole number of 1 or more'
-                      : null;
-                },
               ),
               const SizedBox(height: 16),
               DropdownButtonFormField<TaskSchedule>(
@@ -1224,6 +1249,80 @@ class _HabitFormScreenState extends ConsumerState<HabitFormScreen> {
     }
   }
 
+  Future<void> _chooseCustomColor() async {
+    var hsvColor = HSVColor.fromColor(Color(_color));
+    final picked = await showDialog<Color>(
+      context: context,
+      builder: (dialogContext) => StatefulBuilder(
+        builder: (context, setDialogState) => AlertDialog(
+          title: const Text('Choose a custom color'),
+          content: SizedBox(
+            width: 320,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Container(
+                  height: 72,
+                  decoration: BoxDecoration(
+                    color: hsvColor.toColor(),
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: AppTheme.textMuted),
+                  ),
+                ),
+                const SizedBox(height: 16),
+                _ColorSlider(
+                  label: 'Hue',
+                  value: hsvColor.hue,
+                  max: 360,
+                  activeColor: HSVColor.fromAHSV(
+                    1,
+                    hsvColor.hue,
+                    1,
+                    1,
+                  ).toColor(),
+                  onChanged: (value) =>
+                      setDialogState(() => hsvColor = hsvColor.withHue(value)),
+                ),
+                _ColorSlider(
+                  label: 'Saturation',
+                  value: hsvColor.saturation,
+                  max: 1,
+                  activeColor: hsvColor.toColor(),
+                  onChanged: (value) => setDialogState(
+                    () => hsvColor = hsvColor.withSaturation(value),
+                  ),
+                ),
+                _ColorSlider(
+                  label: 'Brightness',
+                  value: hsvColor.value,
+                  max: 1,
+                  activeColor: hsvColor.toColor(),
+                  onChanged: (value) => setDialogState(
+                    () => hsvColor = hsvColor.withValue(value),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(dialogContext).pop(),
+              child: const Text('Cancel'),
+            ),
+            FilledButton(
+              onPressed: () =>
+                  Navigator.of(dialogContext).pop(hsvColor.toColor()),
+              child: const Text('Use color'),
+            ),
+          ],
+        ),
+      ),
+    );
+    if (!mounted || picked == null) return;
+    setState(() => _color = picked.toARGB32());
+  }
+
   Future<void> _save() async {
     if (!_formKey.currentState!.validate()) return;
     setState(() => _saving = true);
@@ -1244,7 +1343,7 @@ class _HabitFormScreenState extends ConsumerState<HabitFormScreen> {
       groupName: existing?.groupName ?? '',
       habitType: _habitType,
       goalPeriod: _goalPeriod,
-      goalValue: int.parse(_goalValueController.text.trim()),
+      goalValue: existing?.goalValue ?? 1,
       taskSchedule: _taskSchedule,
       timeRange: _timeRange,
       remindersEnabled: _remindersEnabled,
@@ -2636,11 +2735,9 @@ extension on String {
       isEmpty ? this : '${this[0].toUpperCase()}${substring(1)}';
 }
 
-
 //jacky kkontol
 // pantek
 
-
 //dsdsdsdssdsd
 // qwsdfghjg
-//tambah 
+//tambah
